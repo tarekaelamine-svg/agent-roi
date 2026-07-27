@@ -258,7 +258,7 @@ def test_enterprise_runner_loads_central_policy_and_heartbeats(tmp_path: Path) -
         assert result.output == "ok"
         inventory = service.store.get_agent("acme", "finops-agent", "prod")
         assert inventory["last_heartbeat_utc"]
-        assert inventory["version"] == "2.0.0"
+        assert inventory["version"] == "2.0.1"
         assert runner.heartbeat_errors == []
     finally:
         server.should_exit = True

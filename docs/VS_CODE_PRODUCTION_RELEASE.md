@@ -204,13 +204,13 @@ After CI and TestPyPI validation:
 git checkout main
 git pull --ff-only
 .\scripts\prepare_release.ps1 -RequireCleanGit
-git tag -s v2.0.0 -m "Agent-ROI 2.0.0"
-git push origin v2.0.0
+git tag -s v2.0.1 -m "Agent-ROI 2.0.0"
+git push origin v2.0.1
 ```
 
 If you do not have a configured GPG signing key, configure one before this step. Do not create an unsigned release tag for production.
 
-Pushing `v2.0.0` starts two workflows:
+Pushing `v2.0.1` starts two workflows:
 
 - **Publish Python release** publishes the exact tested wheel and source distribution to PyPI and creates the GitHub release.
 - **Publish container image** publishes the multi-architecture container to GHCR with SBOM and provenance attestations.
