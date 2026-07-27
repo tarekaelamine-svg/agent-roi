@@ -14,7 +14,10 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 compatibility
+    import tomli as tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
