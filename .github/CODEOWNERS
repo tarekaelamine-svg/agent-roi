@@ -1,0 +1,7 @@
+# Rename this file to CODEOWNERS and replace the placeholders.
+* @tarekaelamine-svg/platform-maintainers
+/src/agent_roi/enterprise/ @tarekaelamine-svg/security-maintainers
+/src/agent_roi/migrations/ @tarekaelamine-svg/database-maintainers
+/deployment/ @tarekaelamine-svg/platform-maintainers
+/.github/workflows/ @tarekaelamine-svg/release-maintainers
+/pyproject.toml @tarekaelamine-svg/release-maintainers

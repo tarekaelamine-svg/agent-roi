@@ -1,0 +1,59 @@
+image:
+  repository: ghcr.io/example/agent-roi
+  tag: "2.0.0"
+  digest: ""
+  pullPolicy: IfNotPresent
+replicaCount: 2
+revisionHistoryLimit: 5
+service:
+  port: 8080
+serviceAccount:
+  annotations: {}
+  automountServiceAccountToken: false
+postgres:
+  dsnSecretName: agent-roi-database
+  dsnSecretKey: dsn
+signing:
+  provider: hmac
+  keyId: control-plane-hmac
+  secretName: agent-roi-signing
+  secretKey: secret
+  awsKmsKeyId: ""
+  awsKmsSigningAlgorithm: RSASSA_PSS_SHA_256
+  azureKeyId: ""
+  azureSigningAlgorithm: PS256
+  gcpKmsKeyId: ""
+  vaultUrl: ""
+  vaultKeyName: ""
+  vaultKeyVersion: 0
+  vaultTokenSecretName: agent-roi-vault
+  vaultTokenSecretKey: token
+oidc:
+  issuer: ""
+  audience: ""
+  jwksUrl: ""
+outbox:
+  enabled: true
+  replicas: 1
+  destinationsSecretName: agent-roi-outbox
+  destinationsSecretKey: destinations.json
+resources:
+  requests: {cpu: 100m, memory: 256Mi}
+  limits: {cpu: 1000m, memory: 1Gi}
+podDisruptionBudget:
+  minAvailable: 1
+networkPolicy:
+  enabled: false
+  ingressNamespaceSelector: {}
+  egress: []
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []

@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-roi.name" . }}
+  labels:
+    {{- include "agent-roi.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "agent-roi.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "agent-roi.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "agent-roi.name" . }}
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: control-plane
+          image: "{{ include "agent-roi.image" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--host", "0.0.0.0", "--port", "8080"]
+          ports: [{name: http, containerPort: 8080}]
+          env:
+            - name: AGENT_ROI_SIGNING_PROVIDER
+              value: {{ .Values.signing.provider | quote }}
+            - name: AGENT_ROI_SIGNING_KEY_ID
+              value: {{ .Values.signing.keyId | quote }}
+            - name: AGENT_ROI_POSTGRES_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.dsnSecretName }}
+                  key: {{ .Values.postgres.dsnSecretKey }}
+            {{- if eq .Values.signing.provider "hmac" }}
+            - name: AGENT_ROI_POLICY_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.signing.secretName }}
+                  key: {{ .Values.signing.secretKey }}
+            {{- else if eq .Values.signing.provider "aws-kms" }}
+            - name: AGENT_ROI_AWS_KMS_KEY_ID
+              value: {{ required "signing.awsKmsKeyId is required" .Values.signing.awsKmsKeyId | quote }}
+            - name: AGENT_ROI_AWS_KMS_SIGNING_ALGORITHM
+              value: {{ .Values.signing.awsKmsSigningAlgorithm | quote }}
+            {{- else if eq .Values.signing.provider "azure-key-vault" }}
+            - name: AGENT_ROI_AZURE_KEY_ID
+              value: {{ required "signing.azureKeyId is required" .Values.signing.azureKeyId | quote }}
+            - name: AGENT_ROI_AZURE_SIGNING_ALGORITHM
+              value: {{ .Values.signing.azureSigningAlgorithm | quote }}
+            {{- else if eq .Values.signing.provider "gcp-kms" }}
+            - name: AGENT_ROI_GCP_KMS_KEY_ID
+              value: {{ required "signing.gcpKmsKeyId is required" .Values.signing.gcpKmsKeyId | quote }}
+            {{- else if eq .Values.signing.provider "vault-transit" }}
+            - name: AGENT_ROI_VAULT_URL
+              value: {{ required "signing.vaultUrl is required" .Values.signing.vaultUrl | quote }}
+            - name: AGENT_ROI_VAULT_KEY_NAME
+              value: {{ required "signing.vaultKeyName is required" .Values.signing.vaultKeyName | quote }}
+            - name: AGENT_ROI_VAULT_KEY_VERSION
+              value: {{ .Values.signing.vaultKeyVersion | quote }}
+            - name: AGENT_ROI_VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.signing.vaultTokenSecretName }}
+                  key: {{ .Values.signing.vaultTokenSecretKey }}
+            {{- end }}
+            - name: AGENT_ROI_OIDC_ISSUER
+              value: {{ required "oidc.issuer is required" .Values.oidc.issuer | quote }}
+            - name: AGENT_ROI_OIDC_AUDIENCE
+              value: {{ required "oidc.audience is required" .Values.oidc.audience | quote }}
+            - name: AGENT_ROI_OIDC_JWKS_URL
+              value: {{ .Values.oidc.jwksUrl | quote }}
+          startupProbe:
+            httpGet: {path: /healthz, port: http}
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+{{- if .Values.outbox.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-roi.name" . }}-outbox
+spec:
+  replicas: {{ .Values.outbox.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agent-roi-outbox
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: agent-roi-outbox
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "agent-roi.name" . }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: outbox
+          image: "{{ include "agent-roi.image" . }}"
+          command: ["agent-roi-outbox"]
+          env:
+            - name: AGENT_ROI_POSTGRES_DSN
+              valueFrom:
+                secretKeyRef: {name: {{ .Values.postgres.dsnSecretName }}, key: {{ .Values.postgres.dsnSecretKey }}}
+            - name: AGENT_ROI_OUTBOX_DESTINATIONS
+              valueFrom:
+                secretKeyRef: {name: {{ .Values.outbox.destinationsSecretName }}, key: {{ .Values.outbox.destinationsSecretKey }}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}

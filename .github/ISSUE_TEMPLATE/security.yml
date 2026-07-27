@@ -1,0 +1,13 @@
+name: Security concern
+about: Do not disclose vulnerabilities in a public issue
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not submit sensitive vulnerability details here. Follow SECURITY.md and contact the private security channel defined by the repository owner.
+  - type: checkboxes
+    attributes:
+      label: Confirmation
+      options:
+        - label: I will use the private reporting method in SECURITY.md.
+          required: true

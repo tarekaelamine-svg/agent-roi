@@ -1,0 +1,7 @@
+# Rename this file to CODEOWNERS and replace the placeholders.
+* @YOUR_ORG/platform-maintainers
+/src/agent_roi/enterprise/ @YOUR_ORG/security-maintainers
+/src/agent_roi/migrations/ @YOUR_ORG/database-maintainers
+/deployment/ @YOUR_ORG/platform-maintainers
+/.github/workflows/ @YOUR_ORG/release-maintainers
+/pyproject.toml @YOUR_ORG/release-maintainers

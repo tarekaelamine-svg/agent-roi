@@ -1,0 +1,41 @@
+policy_name: cloud_cost_governance
+
+guardrails:
+  max_steps: 8
+  max_tool_calls: 8
+  max_cost_usd: 0.25
+  deterministic: true
+  require_registered_tools: true
+  require_bound_approval_grants: true
+  allowed_tools:
+    - policy_load
+    - finops_analyze
+
+decision_policy:
+  abstain_action: human_review
+  min_confidence: 0.80
+
+approval_routing:
+  # If environment is production and risk is med/high -> approval required
+  production_requires_approval_for_risk: ["med", "high"]
+
+scoring:
+  # Conservative savings multipliers by action
+  savings_multipliers:
+    rightsizing_recommendation: 0.35
+    scheduled_stop: 0.65
+    snapshot_then_delete: 0.90
+    lifecycle_policy_to_infrequent_access: 0.20
+
+thresholds:
+  underutilized_compute:
+    utilization_pct_lt: 10.0
+    monthly_cost_usd_gt: 200.0
+  idle_compute:
+    idle_days_gte: 14
+    monthly_cost_usd_gt: 50.0
+  underutilized_database:
+    utilization_pct_lt: 5.0
+    monthly_cost_usd_gt: 300.0
+  large_bucket:
+    storage_gb_gt: 5000

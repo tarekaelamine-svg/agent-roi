@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Agent-ROI: Create virtual environment",
+      "type": "shell",
+      "command": "py -3.13 -m venv .venv",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent-ROI: Install development dependencies",
+      "type": "shell",
+      "command": ".\\.venv\\Scripts\\python.exe -m pip install --upgrade pip && .\\.venv\\Scripts\\python.exe -m pip install -e \".[dev]\"",
+      "dependsOn": "Agent-ROI: Create virtual environment",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent-ROI: Full production validation",
+      "type": "shell",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\verify_release.py --full",
+      "problemMatcher": [],
+      "group": {"kind": "test", "isDefault": true}
+    },
+    {
+      "label": "Agent-ROI: Build distributions",
+      "type": "shell",
+      "command": ".\\.venv\\Scripts\\python.exe -m build",
+      "dependsOn": "Agent-ROI: Full production validation",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Agent-ROI: Docker build",
+      "type": "shell",
+      "command": "docker build -f deployment/docker/Dockerfile -t agent-roi:2.0.0 .",
+      "dependsOn": "Agent-ROI: Full production validation",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent-ROI: Git status",
+      "type": "shell",
+      "command": "git status --short --branch",
+      "problemMatcher": []
+    }
+  ]
+}

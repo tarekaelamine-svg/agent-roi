@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Environments and builds
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Runtime data and secrets
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.db
+*.jsonl
+artifacts/
+agent-roi-data/
+
+# IDE and OS
+.DS_Store
+Thumbs.db
+.vscode/*.local.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+
+# Local release output
+release-output/
+
+# Local deployment configuration
+.*-venv/
+values-production.yaml
+values-staging.yaml
+destinations*.json
+rendered-*.yaml

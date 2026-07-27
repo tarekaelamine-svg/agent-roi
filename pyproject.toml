@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=77,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-roi"
+version = "2.0.0"
+description = "Enterprise policy, identity, approval, audit, observability, adapters, and realized-ROI controls for agentic workflows"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Tarek" }]
+dependencies = ["PyYAML>=6.0,<7"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+[project.optional-dependencies]
+identity = ["PyJWT[crypto]>=2.8,<3"]
+control-plane = [
+  "fastapi>=0.110,<1",
+  "uvicorn>=0.29,<1",
+  "PyJWT[crypto]>=2.8,<3",
+]
+observability = [
+  "opentelemetry-api>=1.24,<2",
+  "opentelemetry-sdk>=1.24,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.24,<2",
+]
+postgres = ["psycopg[binary]>=3.1,<4"]
+aws = ["boto3>=1.34,<2"]
+azure = ["azure-keyvault-keys>=4.9,<5", "azure-identity>=1.17,<2"]
+gcp = ["google-cloud-kms>=3.0,<4", "cryptography>=42,<47"]
+enterprise = [
+  "fastapi>=0.110,<1",
+  "uvicorn>=0.29,<1",
+  "PyJWT[crypto]>=2.8,<3",
+  "opentelemetry-api>=1.24,<2",
+  "opentelemetry-sdk>=1.24,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.24,<2",
+  "psycopg[binary]>=3.1,<4",
+  "boto3>=1.34,<2",
+  "azure-keyvault-keys>=4.9,<5",
+  "azure-identity>=1.17,<2",
+  "google-cloud-kms>=3.0,<4",
+  "cryptography>=42,<47",
+]
+dev = [
+  "pytest>=7.0,<9",
+  "pytest-cov>=4.0,<7",
+  "build>=1.2.0,<2",
+  "fastapi>=0.110,<1",
+  "uvicorn>=0.29,<1",
+  "PyJWT[crypto]>=2.8,<3",
+  "opentelemetry-api>=1.24,<2",
+  "opentelemetry-sdk>=1.24,<2",
+  "pytest-asyncio>=1.0,<2",
+  "httpx2>=2.7,<3",
+  "twine>=5,<7",
+]
+
+[project.scripts]
+agent-roi = "agent_roi.cli.sentinel:main"
+agent-roi-control-plane = "agent_roi.cli.control_plane:main"
+agent-roi-db = "agent_roi.cli.database:main"
+agent-roi-outbox = "agent_roi.cli.outbox:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+agent_roi = ["policies/*.yaml", "migrations/postgres/*.sql", "py.typed"]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra --strict-markers"
+filterwarnings = [
+  "error",
+  'ignore:websockets\.legacy is deprecated:DeprecationWarning:websockets\.legacy',
+  'ignore:websockets\.server\.WebSocketServerProtocol is deprecated:DeprecationWarning:uvicorn\.protocols\.websockets\.websockets_impl',
+]
+[tool.coverage.run]
+branch = true
+source = ["agent_roi"]
+
+[tool.coverage.report]
+fail_under = 98.0
+precision = 2
+show_missing = true
+skip_covered = true
+

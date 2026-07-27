@@ -1,0 +1,56 @@
+# Copy this file outside the repository and replace every placeholder.
+image:
+  repository: ghcr.io/YOUR_ORG/agent-roi
+  tag: ""
+  digest: "sha256:REPLACE_WITH_RELEASE_DIGEST"
+  pullPolicy: IfNotPresent
+
+replicaCount: 3
+serviceAccount:
+  annotations:
+    # Configure your cloud workload identity annotation here.
+    example.com/workload-identity: REPLACE_ME
+
+postgres:
+  dsnSecretName: agent-roi-database
+  dsnSecretKey: dsn
+
+signing:
+  provider: aws-kms # hmac | aws-kms | azure-key-vault | gcp-kms | vault-transit
+  keyId: production-policy-key
+  awsKmsKeyId: REPLACE_WITH_KMS_KEY_ARN
+
+oidc:
+  issuer: https://identity.example.com/
+  audience: agent-roi-control-plane
+  jwksUrl: https://identity.example.com/.well-known/jwks.json
+
+outbox:
+  enabled: true
+  replicas: 2
+  destinationsSecretName: agent-roi-outbox
+  destinationsSecretKey: destinations.json
+
+networkPolicy:
+  enabled: true
+  ingressNamespaceSelector:
+    kubernetes.io/metadata.name: ingress-system
+  # Add explicit DNS, PostgreSQL, OIDC, KMS and destination egress rules.
+  egress: []
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  className: internal
+  annotations: {}
+  hosts:
+    - host: agent-roi.internal.example.com
+      path: /
+  tls:
+    - secretName: agent-roi-tls
+      hosts: [agent-roi.internal.example.com]

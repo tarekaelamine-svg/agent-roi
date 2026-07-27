@@ -1,0 +1,34 @@
+policy_name: procurement_spend_leakage
+
+guardrails:
+  max_steps: 8
+  max_tool_calls: 8
+  max_cost_usd: 0.25
+  deterministic: true
+  require_registered_tools: true
+  require_bound_approval_grants: true
+  allowed_tools:
+    - policy_load
+    - procurement_analyze
+
+decision_policy:
+  abstain_action: human_review
+  min_confidence: 0.82
+
+approval_routing:
+  requires_approval_for_risk: ["med", "high"]
+  production_requires_approval_for_risk: ["med", "high"]
+
+scoring:
+  savings_multipliers:
+    duplicate_invoice: 1.00
+    price_variance: 0.60
+    unapproved_vendor: 0.40
+
+thresholds:
+  duplicate_invoice:
+    amount_usd_gt: 1000.0
+  price_variance:
+    pct_gt: 15.0
+  unapproved_vendor:
+    always_flag: true

@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agentroi
+      POSTGRES_USER: agentroi
+      POSTGRES_PASSWORD: change-me
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentroi -d agentroi"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+    entrypoint: ["agent-roi-db"]
+    command: ["migrate"]
+    environment:
+      AGENT_ROI_POSTGRES_DSN: postgresql://agentroi:change-me@postgres:5432/agentroi
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  control-plane:
+    # Local development only. Production deployments must configure OIDC.
+    command: ["--allow-unauthenticated", "--host", "0.0.0.0", "--port", "8080"]
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+    environment:
+      AGENT_ROI_POSTGRES_DSN: postgresql://agentroi:change-me@postgres:5432/agentroi
+      AGENT_ROI_CONTROL_PLANE_DB: /tmp/reference.sqlite3
+      AGENT_ROI_POLICY_SIGNING_KEY: replace-with-secret-manager-value
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  outbox-worker:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+    entrypoint: ["agent-roi-outbox"]
+    environment:
+      AGENT_ROI_POSTGRES_DSN: postgresql://agentroi:change-me@postgres:5432/agentroi
+      AGENT_ROI_OUTBOX_DESTINATIONS: '{"telemetry":"https://example.invalid/events"}'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-data:
