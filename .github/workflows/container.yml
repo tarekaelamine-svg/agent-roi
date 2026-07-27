@@ -36,6 +36,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
+          python -m pip check
           python scripts/verify_release.py --expected-tag "${GITHUB_REF_NAME}"
           pytest --cov=agent_roi --cov-branch --cov-report=term --cov-fail-under=98
       - uses: docker/setup-buildx-action@v4
