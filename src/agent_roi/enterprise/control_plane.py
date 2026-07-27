@@ -1145,7 +1145,7 @@ def create_fastapi_app(
     except ImportError as exc:  # pragma: no cover - optional dependency
         raise RuntimeError("FastAPI is required. Install agent-roi[control-plane].") from exc
 
-    app = FastAPI(title="Agent-ROI Enterprise Control Plane", version="2.0.0")
+    app = FastAPI(title="Agent-ROI Enterprise Control Plane", version="2.0.1")
 
     def principal_dependency(authorization: str = Header(default="")) -> Any:
         if oidc_verifier is None:

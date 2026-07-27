@@ -4,7 +4,7 @@ try:
     from importlib.metadata import version
     __version__ = version("agent-roi")
 except Exception:  # Source checkout before installation
-    __version__ = "2.0.0"
+    __version__ = "2.0.1"
 
 from .audit.store import AuditIntegrityError, AuditStore, InMemoryAuditStore, JsonlAuditStore, SqliteAuditStore
 from .audit.postgres import PostgresAuditStore

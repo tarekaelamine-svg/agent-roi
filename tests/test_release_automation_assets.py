@@ -63,4 +63,4 @@ def test_vscode_release_assets_and_runbook_are_packaged() -> None:
     runbook = (ROOT / "docs" / "VS_CODE_PRODUCTION_RELEASE.md").read_text()
     assert "Trusted Publishing" in runbook
     assert "helm upgrade --install" in runbook
-    assert "v2.0.0" in runbook
+    assert "v2.0.1" in runbook

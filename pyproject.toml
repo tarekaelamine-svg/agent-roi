@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-roi"
-version = "2.0.0"
+version = "2.0.1"
 description = "Enterprise policy, identity, approval, audit, observability, adapters, and realized-ROI controls for agentic workflows"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -61,6 +61,7 @@ dev = [
   "PyJWT[crypto]>=2.8,<3",
   "opentelemetry-api>=1.24,<2",
   "opentelemetry-sdk>=1.24,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.24,<2",
   "pytest-asyncio>=1.0,<2",
   "httpx2>=2.7,<3",
   "twine>=5,<7",
